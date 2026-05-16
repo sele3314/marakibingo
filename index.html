@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maraki Bingo</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header-info">
+            <div class="info-box">Drawn: <span id="last-drawn">-</span></div>
+            <div class="info-box">Ball Count: <span id="ball-count">0</span></div>
+        </div>
+
+        <div class="board-section">
+            <h3>ቢንጎ ሰሌዳ (Bingo Board)</h3>
+            <div id="bingo-board" class="numbers-grid"></div>
+        </div>
+
+        <div class="card-section">
+            <h3>የእርስዎ ካርድ (Your Card)</h3>
+            <div id="player-card" class="card-grid"></div>
+        </div>
+
+        <div class="action-buttons">
+            <button id="bingo-btn" class="btn bingo">Bingo!</button>
+            <button id="leave-btn" class="btn leave">Leave Game</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
