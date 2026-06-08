@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maraki Bingo</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            margin: auto;
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        h1 { color: #ffcc00; }
+        .number-display {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: #00ffcc;
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid #00ffcc;
+            display: inline-block;
+            min-width: 150px;
+        }
+        .status { color: #888; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🎰 MARAKI BINGO 🎰</h1>
+    <p>የመጨረሻ የወጣው ቁጥር፦</p>
+    <div class="number-display" id="bingoNumber">-</div>
+    <p class="status" id="gameStatus">ከ Termux ሰርቨር ጋር በመገናኘት ላይ...</p>
+</div>
+
+<script>
+    // በአዲሱ የ localhost.run ሊንክ የተተካ
+    const API_URL = "https://d205e1dd6c35fd.lhr.life/get_number";
+
+    function fetchBingoNumber() {
+        fetch(API_URL)
+            .then(response => response.json())
+            .then(data => {
+                if (data.number) {
+                    document.getElementById("bingoNumber").innerText = data.number;
+                    document.getElementById("gameStatus").innerText = "🎮 ጨዋታው በመካሄድ ላይ ነው (Termux Live)";
+                    document.getElementById("gameStatus").style.color = "#00ffcc";
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching data:", error);
+                document.getElementById("gameStatus").innerText = "❌ ከሰርቨር ጋር መገናኘት አልተቻለም፤ እባክዎ Termux ን ያረጋግጡ።";
+                document.getElementById("gameStatus").style.color = "#ff3333";
+            });
+    }
+
+    // በየ 2 ሰከንዱ አዲስ ቁጥር መውጣቱን ያረጋግጣል
+    setInterval(fetchBingoNumber, 2000);
+    fetchBingoNumber();
+</script>
+
+</body>
+</html>
