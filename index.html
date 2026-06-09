@@ -48,7 +48,8 @@
 
 <script>
     // ትክክለኛው የ localhost.run ሊንክ ከማህደረ ትውስታ ማለፊያ (Cache Buster) ጋር
-    const API_URL = "https://selebingo.loca.lt/get_number";
+    const API_URL = "https://f9ef3fa51ba5dc.lhr.life/get_number?t=" + new Date().getTime();
+
     
     function fetchBingoNumber() {
         fetch(API_URL, { cache: "no-store" })
