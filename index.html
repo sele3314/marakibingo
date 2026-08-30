@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Choice Bingo ⚡</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; user-select: none; }
+        body { background-color: #0d1a10; color: #ffffff; text-align: center; display: flex; flex-direction: column; min-height: 100vh; justify-content: space-between; }
+        
+        .header { background: #14281a; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #23472e; }
+        .header-title { font-size: 18px; font-weight: bold; color: #4cd964; }
+
+        .stats-container { display: flex; justify-content: space-around; background: #112216; margin: 8px; padding: 10px; border-radius: 12px; border: 1px solid #1e3c27; }
+        .stat-box { display: flex; flex-direction: column; align-items: center; }
+        .stat-label { font-size: 10px; color: #a0b8a6; text-transform: uppercase; }
+        .stat-value { font-size: 16px; font-weight: bold; color: #ffffff; margin-top: 2px; }
+        .jackpot-val { color: #ffcc00; }
+
+        .drawn-container { background: #17301d; margin: 0 8px 8px 8px; padding: 10px; border-radius: 12px; display: flex; align-items: center; justify-content: space-around; border: 1px solid #234b2d; }
+        .drawn-circle { width: 50px; height: 50px; background: radial-gradient(circle, #ffe600, #d4a000); border-radius: 50%; color: #000; font-size: 24px; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 12px rgba(255, 230, 0, 0.4); }
+        .drawn-info { text-align: left; }
+        .drawn-info .title { font-size: 11px; color: #a0b8a6; }
+        .drawn-info .sub { font-size: 15px; font-weight: bold; color: #ffcc00; }
+
+        .bingo-board { display: flex; flex-direction: column; gap: 2px; margin: 0 8px; background: #08120b; padding: 6px; border-radius: 8px; border: 1px solid #17331d; }
+        .bingo-row { display: flex; align-items: center; gap: 3px; }
+        .letter-box { width: 20px; font-weight: bold; font-size: 14px; color: #4cd964; text-align: center; }
+        .num-cells { display: grid; grid-template-columns: repeat(15, 1fr); gap: 2px; flex-grow: 1; }
+        .cell { background: #132719; font-size: 8px; padding: 3px 0; border-radius: 2px; color: #80a389; }
+        .cell.drawn { background: #ffcc00; color: #000; font-weight: bold; }
+
+        /* Card Section Fixed & Visible */
+        .card-section { margin: 8px; background: #0c180f; padding: 10px; border-radius: 12px; border: 1px solid #193520; max-height: 250px; overflow-y: auto; }
+        .cards-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 6px; }
+        .card-btn { background: #172d1c; border: 1px solid #284f31; color: #ffffff; padding: 8px 0; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; display: block; }
+        .card-btn.selected { background: #27ae60; border-color: #2ecc71; color: #fff; box-shadow: 0 0 8px rgba(46, 204, 113, 0.6); }
+
+        .navbar { background: #112216; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #1d3a24; position: sticky; bottom: 0; }
+        .nav-item { color: #7a9e83; font-size: 11px; text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .nav-item.active { color: #ffcc00; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <span class="header-title">Choice Bingo ⚡</span>
+        <span style="font-size: 11px; color: #a0b8a6;">መጫወቻ ቦታ</span>
+    </div>
+
+    <div class="stats-container">
+        <div class="stat-box">
+            <span class="stat-label">የካርድ ዋጋ</span>
+            <span class="stat-value">10.00 ብር</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-label">ደራሽ (75%)</span>
+            <span class="stat-value jackpot-val" id="jackpotAmount">0.00 ብር</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-label">የተያዙ ካርዶች</span>
+            <span class="stat-value" id="totalCardsCount">0</span>
+        </div>
+    </div>
+
+    <div class="drawn-container">
+        <div class="drawn-circle" id="drawnNum">--</div>
+        <div class="drawn-info">
+            <div class="title" id="timerLabel">ቀጣይ ዙር የሚጀምረው:</div>
+            <div class="sub" id="roundStatus">60 ሰከንድ</div>
+        </div>
+    </div>
+
+    <div class="bingo-board">
+        <div class="bingo-row"><span class="letter-box">B</span><div class="num-cells" id="row-B"></div></div>
+        <div class="bingo-row"><span class="letter-box">I</span><div class="num-cells" id="row-I"></div></div>
+        <div class="bingo-row"><span class="letter-box">N</span><div class="num-cells" id="row-N"></div></div>
+        <div class="bingo-row"><span class="letter-box">G</span><div class="num-cells" id="row-G"></div></div>
+        <div class="bingo-row"><span class="letter-box">O</span><div class="num-cells" id="row-O"></div></div>
+    </div>
+
+    <div class="card-section">
+        <p style="font-size: 12px; color: #4cd964; font-weight: bold;">ካርድ ይምረጡ (1 - 70)፦</p>
+        <div class="cards-grid" id="cardsGrid"></div>
+    </div>
+
+    <div class="navbar">
+        <div class="nav-item active">
+            <span>🎮</span>
+            <span>BINGO</span>
+        </div>
+        <div class="nav-item">
+            <span>👛</span>
+            <span>WALLET</span>
+        </div>
+        <div class="nav-item">
+            <span>🏆</span>
+            <span>RANK</span>
+        </div>
+    </div>
+
+    <script>
+        const CARD_PRICE = 10;
+        const HOUSE_EDGE = 0.25;
+        let selectedCards = [];
+        let drawnNumbers = [];
+        let countdown = 60;
+
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+
+        // 1. Build B-I-N-G-O Cells
+        const ranges = { 'B': [1, 15], 'I': [16, 30], 'N': [31, 45], 'G': [46, 60], 'O': [61, 75] };
+        for (let letter in ranges) {
+            const container = document.getElementById(`row-${letter}`);
+            for (let i = ranges[letter][0]; i <= ranges[letter][1]; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.id = `cell-${i}`;
+                cell.innerText = i;
+                container.appendChild(cell);
+            }
+        }
+
+        // 2. Render Cards 1 to 70
+        const cardsGrid = document.getElementById('cardsGrid');
+        for (let i = 1; i <= 70; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'card-btn';
+            btn.innerText = i;
+            btn.onclick = () => toggleCard(i, btn);
+            cardsGrid.appendChild(btn);
+        }
+
+        function toggleCard(cardNum, btn) {
+            if (selectedCards.includes(cardNum)) {
+                selectedCards = selectedCards.filter(c => c !== cardNum);
+                btn.classList.remove('selected');
+            } else {
+                selectedCards.push(cardNum);
+                btn.classList.add('selected');
+            }
+            const totalCount = selectedCards.length;
+            const jackpot = (totalCount * CARD_PRICE) * (1 - HOUSE_EDGE);
+            document.getElementById('totalCardsCount').innerText = totalCount;
+            document.getElementById('jackpotAmount').innerText = jackpot.toFixed(2) + " ብር";
+        }
+
+        // 3. Game Timer & Number Drawing
+        setInterval(() => {
+            countdown--;
+            if (countdown > 0) {
+                document.getElementById('timerLabel').innerText = "ቀጣይ ዙር የሚጀምረው:";
+                document.getElementById('roundStatus').innerText = countdown + " ሰከንድ";
+            } else if (countdown === 0) {
+                startRound();
+            }
+        }, 1000);
+
+        function startRound() {
+            document.getElementById('timerLabel').innerText = "ጨዋታው ተጀምሯል 🎲";
+            drawnNumbers = [];
+            let interval = setInterval(() => {
+                if (drawnNumbers.length >= 75) {
+                    clearInterval(interval);
+                    countdown = 60;
+                    document.querySelectorAll('.cell').forEach(c => c.classList.remove('drawn'));
+                    document.getElementById('drawnNum').innerText = "--";
+                    return;
+                }
+                let n;
+                do { n = Math.floor(Math.random() * 75) + 1; } while (drawnNumbers.includes(n));
+                drawnNumbers.push(n);
+                document.getElementById('drawnNum').innerText = n;
+                document.getElementById('roundStatus').innerText = "የወጡ: " + drawnNumbers.length + "/75";
+                let c = document.getElementById(`cell-${n}`);
+                if (c) c.classList.add('drawn');
+            }, 3000);
+        }
+    </script>
+
+</body>
+</html>
